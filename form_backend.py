@@ -7,8 +7,11 @@ import re
 
 # --- App and DB Setup ---
 app = Flask(__name__, template_folder='templates')
-db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'submissions.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+if os.environ.get('DATABASE_URL'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace("://", "ql://", 1)
+else:
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'submissions.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
