@@ -21,6 +21,7 @@
         .role-specific-fields { display: none; margin-top: 20px; }
     </style>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="form-container">
@@ -45,9 +46,6 @@
             <label for="role-select">Select Your Role</label>
             <select id="role-select" name="role" required>
                 <option value="" disabled selected>Choose a role...</option>
-                {% for role in roles_data.keys() %}
-                <option value="{{ role }}">{{ role }}</option>
-                {% endfor %}
             </select>
         </div>
         <div class="form-section">
@@ -56,10 +54,35 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        const supabaseUrl = 'YOUR_SUPABASE_URL'; // Replace with your Supabase URL
+        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY'; // Replace with your Supabase anon key
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const roleSelect = document.getElementById('role-select');
+
+            // Fetch roles from Supabase
+            let { data: roles, error } = await supabase
+                .from('roles')
+                .select('name');
+
+            if (error) {
+                console.error('Error fetching roles:', error);
+                alert('Could not fetch roles. Please check the console.');
+                return;
+            }
+
+            // Populate the dropdown
+            roles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role.name;
+                option.textContent = role.name;
+                roleSelect.appendChild(option);
+            });
+
             const submitBtn = document.getElementById('submit-btn');
 
-            submitBtn.addEventListener('click', function() {
+            submitBtn.addEventListener('click', async function() {
                 const fullName = document.getElementById('full-name').value;
                 const email = document.getElementById('email').value;
                 const role = document.getElementById('role-select').value;
@@ -69,23 +92,25 @@
                     return;
                 }
 
-                const submissionData = { fullName, email, role };
+                const submissionData = {
+                    full_name: fullName,
+                    email: email,
+                    role: role,
+                };
+                
                 console.log('Submitting data:', submissionData);
 
-                fetch('/submit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(submissionData),
-                })
-                .then(response => response.ok ? response.json() : Promise.reject(response))
-                .then(data => {
+                const { data, error } = await supabase
+                    .from('submissions')
+                    .insert([submissionData]);
+
+                if (error) {
+                    console.error('Error submitting data:', error);
+                    alert('An error occurred. Please check the console.');
+                } else {
                     console.log('Success:', data);
-                    alert(data.message || 'Report submitted successfully!');
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Make sure the backend is running and check the console.');
-                });
+                    alert('Report submitted successfully!');
+                }
             });
         });
     </script>
