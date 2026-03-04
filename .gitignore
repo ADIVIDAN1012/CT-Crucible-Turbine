@@ -102,3 +102,7 @@ Credentials/
 
 # Heroku
 .runtime.txt
+
+/node_modules/
+
+.history/
