@@ -25,11 +25,9 @@
 </head>
 <body>
     <div class="form-container">
-        <div class="supervisor-welcome">
-            Welcome, Supervisor Aaditya!
-        </div>
         <div class="form-header">
             <h1>Project Role Selection Report</h1>
+            <a href="reports.html">View Reports</a>
         </div>
 
         <div class="form-section">
@@ -46,6 +44,10 @@
             <label for="role-select">Select Your Role</label>
             <select id="role-select" name="role" required>
                 <option value="" disabled selected>Choose a role...</option>
+                <option value="Auditor">Auditor</option>
+                <option value="Designer">Designer</option>
+                <option value="Integrator">Integrator</option>
+                <option value="DBA">DBA</option>
             </select>
         </div>
         <div class="form-section">
@@ -54,8 +56,8 @@
     </div>
 
     <script>
-        const supabaseUrl = 'YOUR_SUPABASE_URL'; // Replace with your Supabase URL
-        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY'; // Replace with your Supabase anon key
+        const supabaseUrl = 'https://djvydvhrmjkmeneekdve.supabase.co'; // Replace with your Supabase URL
+        const supabaseKey = 'sb_publishable_zoEE09emwr0aLUsSvTNc-w_LtFpOcIH'; // Replace with your Supabase anon key
         const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
         document.addEventListener('DOMContentLoaded', async function() {
