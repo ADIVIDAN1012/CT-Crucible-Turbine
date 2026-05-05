@@ -30,8 +30,9 @@ app = Flask(__name__,
             template_folder="../TeamWork", 
             static_folder="../TeamWork/3_PRID_Designer/static")
 
-# Setup DB
-init_db(app)
+# Setup DB (skip if no DATABASE_URL to allow app to load)
+if os.environ.get('DATABASE_URL'):
+    init_db(app)
 
 # Setup LoginManager
 login_manager = LoginManager()

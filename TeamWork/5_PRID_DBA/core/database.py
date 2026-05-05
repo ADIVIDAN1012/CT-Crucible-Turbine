@@ -8,7 +8,7 @@ db = SQLAlchemy()
 
 # Use PostgreSQL in production, SQLite locally
 DB_PATH = os.environ.get('DATABASE_URL', 'sqlite:///orbit_core.db')
-if DB_PATH.startswith('postgres://'):
+if DB_PATH and DB_PATH.startswith('postgres://'):
     DB_PATH = DB_PATH.replace('postgres://', 'postgresql://', 1)
 
 class User(db.Model, UserMixin):
