@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Orbit Project Manager</title>
+    <!-- Server-side Flask routing handles finding styles.css in PRID_3 static/ -->
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .logout-btn { float: right; margin-top: 1rem; color: #ef4444; font-weight: 600; text-decoration: none; }
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .data-table th, .data-table td { border-bottom: 1px solid var(--border-color); padding: 0.75rem; text-align: left; }
+        .data-table th { background-color: var(--bg-color); color: var(--text-secondary); font-weight: 600; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1rem; }
+        .form-group-inline label { display: block; font-size: 0.9rem; margin-bottom: 0.3rem; }
+        .form-group-inline input { width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; }
+        .submit-btn { background: var(--primary-color); color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
+            <div style="display: flex; gap: 1rem;">
+                <a href="{{ url_for('team_view') }}" style="color: var(--primary-color); font-weight: 600; text-decoration: none;">Team View</a>
+                {% if current_user.prid_role == 'PRID_1' %}
+                <a href="{{ url_for('logs_view') }}" style="color: var(--primary-color); font-weight: 600; text-decoration: none;">Full History</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <header class="header">
+            <h1>Orbit Project Manager</h1>
+            <p>Welcome, {{ current_user.username }} | Access Level: <strong style="color: var(--primary-color);">{{ current_user.prid_role }}</strong></p>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div style="margin-bottom: 2rem;">
+                {% for message in messages %}
+                <div class="alert" style="margin-bottom: 0.5rem;">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        <main>
+            <!-- Project Progress Bar -->
+            <div class="orbit-card" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h4 style="margin: 0;">Project Completion</h4>
+                    <span style="font-weight: 600; color: var(--primary-color);">{{ completion_pc }}%</span>
+                </div>
+                <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                    <div style="width: {{ completion_pc }}%; height: 100%; background: var(--primary-color); transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+
+            <div class="orbit-card" style="margin-bottom: 2rem;">
+                <span class="orbit-badge">Task Management</span>
+                <h2 class="role-title">Active Assignments</h2>
+                <p>Manage and track project tasks across all roles.</p>
+                
+                {% if current_user.prid_role == 'PRID_1' %}
+                <!-- Supervisor Task Creation Form -->
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed var(--border-color);">
+                    <h4 style="margin-bottom: 0.5rem;">Create New Task</h4>
+                    <form method="POST" action="{{ url_for('api_create_task') }}" class="form-grid">
+                        <div class="form-group-inline">
+                            <label>Task Title</label>
+                            <input type="text" name="title" required placeholder="e.g. Update user documentation">
+                        </div>
+                        <div class="form-group-inline">
+                            <label>Task Details</label>
+                            <input type="text" name="description" required placeholder="Describe the requirements...">
+                        </div>
+                        <div>
+                            <button type="submit" class="submit-btn">Deploy Task</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Description</th>
+                            <th>Status & Progress</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr>
+                            <td>#{{ task.id }}</td>
+                            <td><strong>{{ task.title }}</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">{{ task.description }}</span></td>
+                            <td>
+                                <span class="orbit-badge">{{ task.status }}</span>
+                                <div style="margin-top: 0.25rem; width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                                    <div style="width: {{ task.progress }}%; height: 100%; background: var(--primary-color); transition: width 0.3s ease;"></div>
+                                </div>
+                                <span style="font-size: 0.75rem; color: var(--text-secondary);">{{ task.progress }}%</span>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem; flex-direction: column;">
+                                    {% if task.status != 'Completed' %}
+                                    <form method="POST" action="{{ url_for('api_update_task_progress', task_id=task.id) }}" style="display:inline;">
+                                        <div style="display: flex; gap: 0.25rem; align-items: center;">
+                                            <input type="number" name="progress" min="0" max="100" value="{{ task.progress }}" style="width: 60px; padding: 0.2rem; font-size: 0.8rem; border: 1px solid var(--border-color); border-radius: 3px;">
+                                            <button type="submit" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; cursor: pointer;">Update</button>
+                                        </div>
+                                    </form>
+                                    {% endif %}
+                                    
+                                    {% if current_user.prid_role == 'PRID_1' %}
+                                    <form method="POST" action="{{ url_for('api_delete_task', task_id=task.id) }}" style="display:inline;">
+                                        <button type="submit" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; cursor: pointer; color: #ef4444; border: 1px solid #ef4444; background: transparent; border-radius: 4px;">Delete</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">No tasks found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Auditor Log view -->
+                {% if current_user.prid_role == 'PRID_1' or current_user.prid_role == 'PRID_2' %}
+                <div class="orbit-card">
+                    <span class="orbit-badge">Activity Log</span>
+                    <h3 class="role-title">Recent Updates</h3>
+                    <ul style="list-style-type: none; font-size: 0.9rem; color: var(--text-secondary); margin-top: 1rem;">
+                        {% for log in audit_logs %}
+                        <li style="margin-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                            <strong>{{ log.user_ref.username if log.user_ref else 'SYSTEM' }}</strong> -> <em>{{ log.action }}</em> <br>
+                            <span style="font-size: 0.8rem;">Module: {{ log.target }} | {{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                        </li>
+                        {% else %}
+                        <li>No recent activity logged.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Integrator Webhooks -->
+                {% if current_user.prid_role == 'PRID_1' or current_user.prid_role == 'PRID_4' %}
+                <div class="orbit-card">
+                    <span class="orbit-badge">Integrations</span>
+                    <h3 class="role-title">Webhooks</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Link external services to your workspace.</p>
+                    <form method="POST" action="{{ url_for('api_add_webhook') }}" style="margin-top: 1rem;">
+                        <input type="text" name="webhook_url" placeholder="https://api.service.com/hook" required style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+                        <button type="submit" class="submit-btn" style="width: 100%; display: block;">Add Webhook</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>
