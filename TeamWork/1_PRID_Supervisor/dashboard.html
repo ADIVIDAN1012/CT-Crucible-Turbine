@@ -96,27 +96,21 @@
                         <tr>
                             <td>#{{ task.id }}</td>
                             <td><strong>{{ task.title }}</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">{{ task.description }}</span></td>
-                            <td>
+                             <td>
                                 <span class="orbit-badge">{{ task.status }}</span>
                                 <div style="margin-top: 0.25rem; width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
-                                    <div style="width: {{ task.progress }}%; height: 100%; background: var(--primary-color); transition: width 0.3s ease;"></div>
+                                    <div style="width: {{ task.calculate_progress() }}%; height: 100%; background: var(--primary-color); transition: width 0.3s ease;"></div>
                                 </div>
-                                <span style="font-size: 0.75rem; color: var(--text-secondary);">{{ task.progress }}%</span>
+                                <span style="font-size: 0.75rem; color: var(--text-secondary);">{{ task.calculate_progress() }}%</span>
                             </td>
                             <td>
                                 <div style="display: flex; gap: 0.5rem; flex-direction: column;">
                                     {% if task.status != 'Completed' %}
-                                    <form method="POST" action="{{ url_for('api_update_task_progress', task_id=task.id) }}" id="form-{{ task.id }}" style="display:inline;">
-                                        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                                            <input type="range" name="progress" min="0" max="100" value="{{ task.progress }}" 
-                                                   oninput="updateProgress({{ task.id }}, this.value)" 
-                                                   style="width: 120px; cursor: pointer;">
-                                            <span id="progress-value-{{ task.id }}" style="font-size: 0.85rem; font-weight: 600; color: var(--primary-color);">{{ task.progress }}%</span>
-                                            <button type="submit" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; cursor: pointer;">Update</button>
-                                        </div>
+                                    <form method="POST" action="{{ url_for('api_update_task_status', task_id=task.id) }}" style="display:inline;">
+                                        <button type="submit" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; cursor: pointer;">Mark Complete</button>
                                     </form>
                                     {% endif %}
-                                    
+                                     
                                     {% if current_user.prid_role == 'PRID_1' %}
                                     <form method="POST" action="{{ url_for('api_delete_task', task_id=task.id) }}" style="display:inline;">
                                         <button type="submit" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; cursor: pointer; color: #ef4444; border: 1px solid #ef4444; background: transparent; border-radius: 4px;">Delete</button>
@@ -166,11 +160,5 @@
             </div>
         </main>
     </div>
-    
-    <script>
-        function updateProgress(taskId, value) {
-            document.getElementById('progress-value-' + taskId).textContent = value + '%';
-        }
-    </script>
 </body>
 </html>
