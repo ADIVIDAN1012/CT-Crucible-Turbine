@@ -1,10 +1,25 @@
 import os
+import sys
+import importlib
 from flask import Flask, jsonify, request, render_template, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
-from TeamWork.5_PRID_DBA.core.database import db, init_db, User, Task, AuditLog, Webhook
-from TeamWork.1_PRID_Supervisor.turbine import require_prid
-from TeamWork.2_PRID_Auditor.Guidelines_Breakdown.integrity_log import record_system_action
+# Dynamic imports for modules with numeric prefixes
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+dba_module = importlib.import_module("TeamWork.5_PRID_DBA.core.database")
+db = dba_module.db
+init_db = dba_module.init_db
+User = dba_module.User
+Task = dba_module.Task
+AuditLog = dba_module.AuditLog
+Webhook = dba_module.Webhook
+
+supervisor_module = importlib.import_module("TeamWork.1_PRID_Supervisor.turbine")
+require_prid = supervisor_module.require_prid
+
+auditor_module = importlib.import_module("TeamWork.2_PRID_Auditor.Guidelines_Breakdown.integrity_log")
+record_system_action = auditor_module.record_system_action
 
 # Setup Flask
 app = Flask(__name__, 
