@@ -1,14 +1,11 @@
-from flask import Flask
+import sys
+import os
 
-app = Flask(__name__)
+# Add the current directory to Python path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-@app.route("/")
-def home():
-    return "Orbit App is running on Render!"
-
-@app.route("/health")
-def health():
-    return {"status": "ok"}, 200
+# Import the Flask app from api/index.py
+from api.index import app
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True, host='0.0.0.0', port=5000)
