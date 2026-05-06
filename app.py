@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
+import requests
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -68,6 +69,22 @@ class AuditLog(db.Model):
     action = db.Column(db.String(255), nullable=False)
     target = db.Column(db.String(128))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Webhook(db.Model):
+    __tablename__ = 'webhooks'
+    id = db.Column(db.Integer, primary_key=True)
+    url = db.Column(db.String(255), nullable=False)
+    event_type = db.Column(db.String(64), nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+
+def trigger_webhooks(event_type, data):
+    """Send POST requests to all active webhooks for event_type"""
+    webhooks = Webhook.query.filter_by(event_type=event_type, is_active=True).all()
+    for webhook in webhooks:
+        try:
+            requests.post(webhook.url, json=data, timeout=5)
+        except:
+            pass  # Silently fail to not break main app flow
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -159,6 +176,7 @@ def api_update_task_progress(task_id):
         task.update_status_from_progress()
         db.session.commit()
         flash(f"Task progress updated to {progress}%!")
+        trigger_webhooks("task_updated", {"task_id": task.id, "title": task.title, "progress": progress, "status": task.status})
     return redirect(url_for('dashboard'))
 
 @app.route("/logout")
@@ -192,6 +210,7 @@ def api_create_task():
     db.session.add(new_task)
     db.session.commit()
     flash("Task created!")
+    trigger_webhooks("task_created", {"task_id": new_task.id, "title": title, "description": description})
     return redirect(url_for('dashboard'))
 
 @app.route("/api/delete_task/<int:task_id>", methods=["POST"])
@@ -200,9 +219,11 @@ def api_delete_task(task_id):
     if current_user.prid_role != 'PRID_1':
         return redirect(url_for('dashboard'))
     task = Task.query.get_or_404(task_id)
+    task_title = task.title
     db.session.delete(task)
     db.session.commit()
     flash("Task deleted!")
+    trigger_webhooks("task_deleted", {"task_title": task_title})
     return redirect(url_for('dashboard'))
 
 @app.route("/api/add_webhook", methods=["POST"])
@@ -210,7 +231,12 @@ def api_delete_task(task_id):
 def api_add_webhook():
     if current_user.prid_role not in ['PRID_1', 'PRID_4']:
         return redirect(url_for('dashboard'))
-    flash("Webhook feature coming soon!")
+    webhook_url = request.form.get("webhook_url")
+    if webhook_url:
+        new_hook = Webhook(url=webhook_url, event_type="task_update")
+        db.session.add(new_hook)
+        db.session.commit()
+        flash(f"Webhook added: {webhook_url}")
     return redirect(url_for('dashboard'))
 
 if __name__ == "__main__":
