@@ -106,9 +106,12 @@
                             <td>
                                 <div style="display: flex; gap: 0.5rem; flex-direction: column;">
                                     {% if task.status != 'Completed' %}
-                                    <form method="POST" action="{{ url_for('api_update_task_progress', task_id=task.id) }}" style="display:inline;">
-                                        <div style="display: flex; gap: 0.25rem; align-items: center;">
-                                            <input type="number" name="progress" min="0" max="100" value="{{ task.progress }}" style="width: 60px; padding: 0.2rem; font-size: 0.8rem; border: 1px solid var(--border-color); border-radius: 3px;">
+                                    <form method="POST" action="{{ url_for('api_update_task_progress', task_id=task.id) }}" id="form-{{ task.id }}" style="display:inline;">
+                                        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                                            <input type="range" name="progress" min="0" max="100" value="{{ task.progress }}" 
+                                                   oninput="updateProgress({{ task.id }}, this.value)" 
+                                                   style="width: 120px; cursor: pointer;">
+                                            <span id="progress-value-{{ task.id }}" style="font-size: 0.85rem; font-weight: 600; color: var(--primary-color);">{{ task.progress }}%</span>
                                             <button type="submit" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; cursor: pointer;">Update</button>
                                         </div>
                                     </form>
@@ -163,5 +166,11 @@
             </div>
         </main>
     </div>
+    
+    <script>
+        function updateProgress(taskId, value) {
+            document.getElementById('progress-value-' + taskId).textContent = value + '%';
+        }
+    </script>
 </body>
 </html>
