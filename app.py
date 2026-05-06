@@ -167,5 +167,51 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+@app.route("/team")
+@login_required
+def team_view():
+    users = User.query.all()
+    return render_template('3_PRID_Designer/team.html', users=users)
+
+@app.route("/logs")
+@login_required
+def logs_view():
+    if current_user.prid_role != 'PRID_1':
+        return redirect(url_for('dashboard'))
+    all_logs = AuditLog.query.order_by(AuditLog.id.desc()).all()
+    return render_template('2_PRID_Auditor/full_logs.html', logs=all_logs)
+
+@app.route("/api/create_task", methods=["POST"])
+@login_required
+def api_create_task():
+    if current_user.prid_role != 'PRID_1':
+        return redirect(url_for('dashboard'))
+    title = request.form.get("title")
+    description = request.form.get("description")
+    new_task = Task(title=title, description=description)
+    db.session.add(new_task)
+    db.session.commit()
+    flash("Task created!")
+    return redirect(url_for('dashboard'))
+
+@app.route("/api/delete_task/<int:task_id>", methods=["POST"])
+@login_required
+def api_delete_task(task_id):
+    if current_user.prid_role != 'PRID_1':
+        return redirect(url_for('dashboard'))
+    task = Task.query.get_or_404(task_id)
+    db.session.delete(task)
+    db.session.commit()
+    flash("Task deleted!")
+    return redirect(url_for('dashboard'))
+
+@app.route("/api/add_webhook", methods=["POST"])
+@login_required
+def api_add_webhook():
+    if current_user.prid_role not in ['PRID_1', 'PRID_4']:
+        return redirect(url_for('dashboard'))
+    flash("Webhook feature coming soon!")
+    return redirect(url_for('dashboard'))
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
