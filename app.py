@@ -106,6 +106,30 @@ def login():
         flash("Invalid credentials.")
     return render_template('3_PRID_Designer/login.html')
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    
+    if request.method == "POST":
+        username = request.form.get("username")
+        prid_role = request.form.get("prid_role")
+        password = request.form.get("password")
+        
+        if User.query.filter_by(username=username).first():
+            flash("Username already exists.")
+            return redirect(url_for('register'))
+        
+        new_user = User(username=username, prid_role=prid_role)
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.commit()
+        
+        login_user(new_user)
+        flash("Registration successful!")
+        return redirect(url_for('dashboard'))
+    return render_template('3_PRID_Designer/register.html')
+
 @app.route("/dashboard")
 @login_required
 def dashboard():
