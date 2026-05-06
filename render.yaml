@@ -9,7 +9,3 @@ services:
         value: 3.12.0
       - key: SECRET_KEY
         generateValue: true
-    disk:
-      name: project-orbit-db
-      mountPath: /tmp
-      sizeGB: 1
