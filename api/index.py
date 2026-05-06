@@ -1,38 +1,18 @@
 import os
-import sys
-import importlib
 from flask import Flask, jsonify, request, render_template, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
-# Append the current directory so modules in TeamWork/ can be resolved
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# Dynamic imports
-dba_module = importlib.import_module("TeamWork.5_PRID_DBA.core.database")
-db = dba_module.db
-init_db = dba_module.init_db
-User = dba_module.User
-Task = dba_module.Task
-AuditLog = dba_module.AuditLog
-Webhook = dba_module.Webhook
-
-supervisor_module = importlib.import_module("TeamWork.1_PRID_Supervisor.turbine")
-require_prid = supervisor_module.require_prid
-
-auditor_module = importlib.import_module("TeamWork.2_PRID_Auditor.Guidelines_Breakdown.integrity_log")
-record_system_action = auditor_module.record_system_action
-
-integrator_module = importlib.import_module("TeamWork.4_PRID_Integrator.modules.api_ext")
-process_webhook = integrator_module.process_webhook
+from TeamWork.5_PRID_DBA.core.database import db, init_db, User, Task, AuditLog, Webhook
+from TeamWork.1_PRID_Supervisor.turbine import require_prid
+from TeamWork.2_PRID_Auditor.Guidelines_Breakdown.integrity_log import record_system_action
 
 # Setup Flask
 app = Flask(__name__, 
             template_folder="../TeamWork", 
             static_folder="../TeamWork/3_PRID_Designer/static")
 
-# Setup DB (skip if no DATABASE_URL to allow app to load)
-if os.environ.get('DATABASE_URL'):
-    init_db(app)
+# Setup DB
+init_db(app)
 
 # Setup LoginManager
 login_manager = LoginManager()
@@ -42,7 +22,6 @@ login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
 
 # --- AUTHENTICATION ROUTES ---
 
@@ -60,12 +39,11 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
+        remember = request.form.get('remember') == '1'
         
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
-            remember = request.form.get('remember') == '1'
             login_user(user, remember=remember)
-            # Log action
             record_system_action("User authenticated successfully.", target="Login")
             return redirect(url_for('dashboard'))
         flash("Invalid credentials.")
@@ -90,10 +68,8 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         
-        # Auditor track
         record_system_action(f"Registered new PRID profile: {username} ({prid_role})", target="System Reg")
         
-        # Auto-login the new user so they don't have to enter their password twice
         login_user(new_user)
         flash("Registration successful. PRID linked to main orchestrator.")
         return redirect(url_for('dashboard'))
@@ -105,7 +81,6 @@ def logout():
     record_system_action("Terminated user session.", target="System Logout")
     logout_user()
     return redirect(url_for('login'))
-
 
 # --- DASHBOARD & CORE ROUTES ---
 
@@ -137,14 +112,14 @@ def team_view():
 
 @app.route("/logs")
 @login_required
-@require_prid("PRID_1") # Full logs for Supervisor
+@require_prid("PRID_1")
 def logs_view():
     all_logs = AuditLog.query.order_by(AuditLog.id.desc()).all()
     return render_template('2_PRID_Auditor/full_logs.html', logs=all_logs)
 
 @app.route("/api/create_task", methods=["POST"])
 @login_required
-@require_prid("PRID_1")  # Only supervisors can generate assignments
+@require_prid("PRID_1")
 def api_create_task():
     title = request.form.get("title")
     description = request.form.get("description")
@@ -199,7 +174,7 @@ def api_delete_task(task_id):
 
 @app.route("/api/add_webhook", methods=["POST"])
 @login_required
-@require_prid("PRID_4")  # Only integrator or supervisor can add webhooks
+@require_prid("PRID_4")
 def api_add_webhook():
     webhook_url = request.form.get("webhook_url")
     if webhook_url:
@@ -210,7 +185,6 @@ def api_add_webhook():
         record_system_action(f"Mounted webhook: {webhook_url}", target="API Ext")
         flash(f"External Integrator mounted at {webhook_url}.")
     return redirect(url_for('dashboard'))
-
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
