@@ -1,11 +1,147 @@
-import sys
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 import os
 
-# Add the current directory to Python path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Initialize extensions
+db = SQLAlchemy()
 
-# Import the Flask app from api/index.py
-from api.index import app
+# Create Flask app
+app = Flask(__name__,
+            template_folder='TeamWork',
+            static_folder='TeamWork/3_PRID_Designer/static')
+
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-12345')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///./orbit.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize with app
+db.init_app(app)
+
+# Setup LoginManager
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+login_manager.init_app(app)
+
+# Define models
+class User(db.Model, UserMixin):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), unique=True, index=True)
+    password_hash = db.Column(db.String(256))
+    prid_role = db.Column(db.String(32), default='PRID_UNASSIGNED')
+    
+    tasks = db.relationship('Task', backref='assignee', lazy=True)
+    
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+class Task(db.Model):
+    __tablename__ = 'tasks'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(128), nullable=False)
+    description = db.Column(db.Text)
+    status = db.Column(db.String(32), default='Pending')
+    progress = db.Column(db.Integer, default=0)
+    assigned_to_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def update_status_from_progress(self):
+        if self.progress >= 100:
+            self.status = 'Completed'
+        elif self.progress >= 75:
+            self.status = 'Review'
+        elif self.progress >= 25:
+            self.status = 'In Progress'
+        else:
+            self.status = 'Pending'
+
+class AuditLog(db.Model):
+    __tablename__ = 'audit_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    action = db.Column(db.String(255), nullable=False)
+    target = db.Column(db.String(128))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+# Create tables
+with app.app_context():
+    db.create_all()
+    if not User.query.filter_by(username='admin').first():
+        u = User(username='admin', prid_role='PRID_1')
+        u.set_password('admin')
+        db.session.add(u)
+        db.session.commit()
+
+# Routes
+@app.route("/")
+def home():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    return redirect(url_for('login'))
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        remember = request.form.get('remember') == '1'
+        
+        user = User.query.filter_by(username=username).first()
+        if user and user.check_password(password):
+            login_user(user, remember=remember)
+            return redirect(url_for('dashboard'))
+        flash("Invalid credentials.")
+    return render_template('3_PRID_Designer/login.html')
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    tasks = Task.query.order_by(Task.id.desc()).all()
+    users = User.query.all()
+    audit_logs = AuditLog.query.order_by(AuditLog.id.desc()).limit(5).all()
+    
+    total_tasks = len(tasks)
+    if total_tasks > 0:
+        completion_pc = int(sum(t.progress for t in tasks) / total_tasks)
+    else:
+        completion_pc = 0
+    
+    return render_template('1_PRID_Supervisor/dashboard.html',
+                           tasks=tasks,
+                           users=users,
+                           audit_logs=audit_logs,
+                           completion_pc=completion_pc)
+
+@app.route("/api/update_task_progress/<int:task_id>", methods=["POST"])
+@login_required
+def api_update_task_progress(task_id):
+    task = Task.query.get_or_404(task_id)
+    progress = request.form.get("progress", type=int)
+    if progress is not None and 0 <= progress <= 100:
+        task.progress = progress
+        task.update_status_from_progress()
+        db.session.commit()
+        flash(f"Task progress updated to {progress}%!")
+    return redirect(url_for('dashboard'))
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)
