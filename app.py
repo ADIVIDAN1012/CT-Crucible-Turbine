@@ -86,6 +86,19 @@ def trigger_webhooks(event_type, data):
         except:
             pass  # Silently fail to not break main app flow
 
+def record_system_action(action, target):
+    """Log an action to audit logs"""
+    try:
+        if current_user.is_authenticated:
+            uid = current_user.id
+        else:
+            uid = None
+        new_log = AuditLog(user_id=uid, action=action, target=target)
+        db.session.add(new_log)
+        db.session.commit()
+    except:
+        pass  # Silently fail to not break main app flow
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
