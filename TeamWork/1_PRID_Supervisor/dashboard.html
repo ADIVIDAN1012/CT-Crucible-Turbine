@@ -46,15 +46,16 @@
         {% endwith %}
 
         <main>
-            <!-- Project Progress Bar -->
-            <div class="orbit-card" style="margin-bottom: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <h4 style="margin: 0;">Project Completion</h4>
-                    <span style="font-weight: 600; color: var(--primary-color);">{{ completion_pc }}%</span>
+            <!-- Project Progress Bar - Prominent Top Display -->
+            <div class="orbit-card" style="margin-bottom: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; font-size: 1.5rem;">Project Completion</h3>
+                    <span style="font-size: 2rem; font-weight: 700;">{{ completion_pc }}%</span>
                 </div>
-                <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                    <div style="width: {{ completion_pc }}%; height: 100%; background: var(--primary-color); transition: width 0.3s ease;"></div>
+                <div style="width: 100%; height: 20px; background: rgba(255,255,255,0.3); border-radius: 10px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="width: {{ completion_pc }}%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); transition: width 0.5s ease; border-radius: 10px; box-shadow: 0 2px 8px rgba(16,185,129,0.4);"></div>
                 </div>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; opacity: 0.9;">Overall progress across all tasks</p>
             </div>
 
             <div class="orbit-card" style="margin-bottom: 2rem;">
