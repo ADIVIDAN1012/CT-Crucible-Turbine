@@ -32,21 +32,21 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128), nullable=False)
     description = db.Column(db.Text)
-    status = db.Column(db.String(32), default='Pending') # Pending, In Progress, Completed
+    status = db.Column(db.String(32), default='Pending') # Pending, In Progress, Review, Completed
     progress = db.Column(db.Integer, default=0) # Progress percentage 0-100
     assigned_to_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    def calculate_progress(self):
-        """Auto-calculate progress based on time elapsed (7-day deadline)"""
-        if self.status == 'Completed':
-            return 100
-        if self.status == 'Pending':
-            return 0
-        # For 'In Progress', calculate based on 7 days from creation
-        days_elapsed = (datetime.utcnow() - self.created_at).days
-        progress = min(int((days_elapsed / 7) * 100), 99)  # Cap at 99% until marked complete
-        return progress
+    def update_status_from_progress(self):
+        """Auto-update status based on progress value"""
+        if self.progress >= 100:
+            self.status = 'Completed'
+        elif self.progress >= 75:
+            self.status = 'Review'
+        elif self.progress >= 25:
+            self.status = 'In Progress'
+        else:
+            self.status = 'Pending'
 
 class AuditLog(db.Model):
     __tablename__ = 'audit_logs'

@@ -151,10 +151,7 @@ def api_update_task_progress(task_id):
     progress = request.form.get("progress", type=int)
     if progress is not None and 0 <= progress <= 100:
         task.progress = progress
-        if progress == 100:
-            task.status = "Completed"
-        elif progress > 0:
-            task.status = "In Progress"
+        task.update_status_from_progress()
         db.session.commit()
         record_system_action(f"Updated task progress to {progress}%: {task.title}", target="Tasks")
         flash(f"Task progress updated to {progress}%!")
