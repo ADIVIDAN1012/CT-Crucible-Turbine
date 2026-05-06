@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Orbit Project Manager</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .auth-container { max-width: 400px; margin: 4rem auto; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
+        .btn-primary { display: block; width: 100%; padding: 0.75rem; background: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .alert { padding: 1rem; background: #fee2e2; color: #991b1b; border-radius: 6px; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container auth-container">
+        <header class="header" style="border-bottom: none; margin-bottom: 1rem; padding-bottom: 0;">
+            <h1 style="font-size: 1.8rem;">Create Account</h1>
+            <p>Join the Orbit Project Workspace</p>
+        </header>
+
+        <div class="orbit-card">
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="alert">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('register') }}">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label for="prid_role">Select Your Role</label>
+                    <select id="prid_role" name="prid_role" required>
+                        <option value="PRID_1">Supervisor</option>
+                        <option value="PRID_2">Auditor</option>
+                        <option value="PRID_3">Designer</option>
+                        <option value="PRID_4">Integrator</option>
+                        <option value="PRID_5">Database Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Account</button>
+            </form>
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">Already a member? <a href="{{ url_for('login') }}">Log In</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

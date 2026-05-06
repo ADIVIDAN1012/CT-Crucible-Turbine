@@ -1,5 +1,0 @@
-// PRID_3: Designer UI/UX Zone
-// Assigned to: [AWAITING CONSENT]
-// Scope: Mission Control Visuals and Aesthetics.
-
-// --- WORK ZONE START ---

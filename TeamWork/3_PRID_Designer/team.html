@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team | Orbit Project Manager</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--primary-color); font-weight: 600; text-decoration: none; }
+        .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .user-card { padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 8px; background: white; }
+        .user-avatar { width: 48px; height: 48px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary-color); margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('dashboard') }}" class="back-link">← Return to Dashboard</a>
+        <header class="header">
+            <h1>Project Team</h1>
+            <p>Active members and role assignments in the Orbit workspace.</p>
+        </header>
+
+        <main class="team-grid">
+            {% for u in users %}
+            <div class="user-card">
+                <div class="user-avatar">{{ u.username[0] | upper }}</div>
+                <h3 style="margin: 0 0 0.25rem 0;">{{ u.username }}</h3>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">Role: <span class="orbit-badge">{{ u.prid_role }}</span></p>
+                <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);">
+                    {% if u.prid_role == 'PRID_1' %} Supervisor & Architect {% endif %}
+                    {% if u.prid_role == 'PRID_2' %} Quality & Compliance {% endif %}
+                    {% if u.prid_role == 'PRID_3' %} UI/UX Designer {% endif %}
+                    {% if u.prid_role == 'PRID_4' %} External API Integrator {% endif %}
+                    {% if u.prid_role == 'PRID_5' %} Database Administrator {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </main>
+    </div>
+</body>
+</html>
