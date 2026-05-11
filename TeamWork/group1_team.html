@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group 1 | Orbit Strategic Integrity System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 3rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        }
+        .project-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+        .project-name {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+        .project-name span { background: linear-gradient(135deg, #667eea, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .project-subtitle {
+            color: rgba(255,255,255,0.6);
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 1.5rem;
+        }
+        .group-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #34d399;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .group-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(52,211,153,0.5), transparent);
+        }
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .member-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+        .member-card:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-4px);
+            border-color: rgba(102,126,234,0.4);
+            box-shadow: 0 8px 25px rgba(102,126,234,0.2);
+        }
+        .member-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+        .member-name {
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .member-role {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+        .count-display {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .count-display p {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+        }
+        .count-display strong {
+            color: #34d399;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <div class="project-badge">Major Project 2026</div>
+        <h1 class="project-name"><span>Orbit:</span> Strategic Integrity System</h1>
+        <p class="project-subtitle">Decentralized Role-Based Project Management Framework with Dynamic Progress Tracking</p>
+        
+        <div class="group-title">Group 1 Members</div>
+        <div class="members-grid" id="memberGrid">
+            <div class="member-card">
+                <div class="member-avatar">A</div>
+                <div class="member-name">Aditya Sadhu</div>
+                <div class="member-role">Supervisor (PRID_1)</div>
+            </div>
+            <div class="member-card">
+                <div class="member-avatar">K</div>
+                <div class="member-name">Khushi</div>
+                <div class="member-role">Designer (PRID_3)</div>
+            </div>
+            <div class="member-card">
+                <div class="member-avatar">R</div>
+                <div class="member-name">Rohit</div>
+                <div class="member-role">Auditor (PRID_2)</div>
+            </div>
+            <div class="member-card">
+                <div class="member-avatar">S</div>
+                <div class="member-name">Shravan</div>
+                <div class="member-role">DBA (PRID_5)</div>
+            </div>
+            <div class="member-card">
+                <div class="member-avatar">V</div>
+                <div class="member-name">Vanshita</div>
+                <div class="member-role">Integrator (PRID_4)</div>
+            </div>
+        </div>
+        
+        <div class="count-display">
+            <p>Total Members: <strong>5</strong> &nbsp;|&nbsp; Project Status: <strong id="statusDisplay">Active</strong> &nbsp;|&nbsp; Year: <strong>2026</strong></p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.member-card');
+            cards.forEach((card, index) => {
+                card.addEventListener('click', function() {
+                    const name = this.querySelector('.member-name').textContent;
+                    document.getElementById('statusDisplay').textContent = 'Selected: ' + name;
+                    cards.forEach(c => c.style.borderColor = 'rgba(255,255,255,0.08)');
+                    this.style.borderColor = '#34d399';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
