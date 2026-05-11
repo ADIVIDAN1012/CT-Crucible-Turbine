@@ -70,6 +70,8 @@ class AuditLog(db.Model):
     target = db.Column(db.String(128))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+    user_ref = db.relationship('User', backref='audit_logs', lazy=True)
+
 class Webhook(db.Model):
     __tablename__ = 'webhooks'
     id = db.Column(db.Integer, primary_key=True)
@@ -87,29 +89,30 @@ def trigger_webhooks(event_type, data):
             pass  # Silently fail to not break main app flow
 
 def record_system_action(action, target):
-    """Log an action to audit logs"""
     try:
-        if current_user.is_authenticated:
-            uid = current_user.id
-        else:
+        try:
+            uid = current_user.id if current_user.is_authenticated else None
+        except RuntimeError:
             uid = None
         new_log = AuditLog(user_id=uid, action=action, target=target)
         db.session.add(new_log)
         db.session.commit()
-    except:
-        pass  # Silently fail to not break main app flow
+    except Exception as e:
+        print(f"[AUDIT ERROR] Failed to log action: {e}")
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Create tables
+# Create tables and seed
 with app.app_context():
     db.create_all()
     if not User.query.filter_by(username='admin').first():
         u = User(username='admin', prid_role='PRID_1')
         u.set_password('admin')
         db.session.add(u)
+        boot_log = AuditLog(user_id=None, action="System initialized with default PRID profiles.", target="System Boot")
+        db.session.add(boot_log)
         db.session.commit()
 
 # Routes
@@ -132,6 +135,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
             login_user(user, remember=remember)
+            record_system_action(f"User {username} authenticated successfully.", target="Login")
             return redirect(url_for('dashboard'))
         flash("Invalid credentials.")
     return render_template('3_PRID_Designer/login.html')
@@ -156,6 +160,7 @@ def register():
         db.session.commit()
         
         login_user(new_user)
+        record_system_action(f"Registered new PRID profile: {username} ({prid_role})", target="System Reg")
         flash("Registration successful!")
         return redirect(url_for('dashboard'))
     return render_template('3_PRID_Designer/register.html')
@@ -188,6 +193,7 @@ def api_update_task_progress(task_id):
         task.progress = progress
         task.update_status_from_progress()
         db.session.commit()
+        record_system_action(f"Updated task progress to {progress}%: {task.title}", target="Tasks")
         flash(f"Task progress updated to {progress}%!")
         trigger_webhooks("task_updated", {"task_id": task.id, "title": task.title, "progress": progress, "status": task.status})
     return redirect(url_for('dashboard'))
@@ -195,6 +201,7 @@ def api_update_task_progress(task_id):
 @app.route("/logout")
 @login_required
 def logout():
+    record_system_action("Terminated user session.", target="System Logout")
     logout_user()
     return redirect(url_for('login'))
 
@@ -222,6 +229,7 @@ def api_create_task():
     new_task = Task(title=title, description=description)
     db.session.add(new_task)
     db.session.commit()
+    record_system_action(f"Generated new task: {title}", target="Task Management")
     flash("Task created!")
     trigger_webhooks("task_created", {"task_id": new_task.id, "title": title, "description": description})
     return redirect(url_for('dashboard'))
@@ -232,11 +240,11 @@ def api_delete_task(task_id):
     if current_user.prid_role != 'PRID_1':
         return redirect(url_for('dashboard'))
     task = Task.query.get_or_404(task_id)
-    task_title = task.title
+    record_system_action(f"Deleted task: {task.title}", target="Tasks")
     db.session.delete(task)
     db.session.commit()
     flash("Task deleted!")
-    trigger_webhooks("task_deleted", {"task_title": task_title})
+    trigger_webhooks("task_deleted", {"task_title": task.title})
     return redirect(url_for('dashboard'))
 
 @app.route("/api/add_webhook", methods=["POST"])

@@ -106,3 +106,4 @@ Credentials/
 /node_modules/
 
 .history/
+.vercel

@@ -103,5 +103,7 @@ def init_db(app):
             u5.set_password('password')
             db.session.add(u5)
             
+            boot_log = AuditLog(user_id=None, action="System initialized — default PRID profiles seeded.", target="System Boot")
+            db.session.add(boot_log)
             db.session.commit()
             print("Seeded default test users (admin / password) for each PRID role.")

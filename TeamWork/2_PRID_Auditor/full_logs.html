@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity History | Orbit Project Manager</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--primary-color); font-weight: 600; text-decoration: none; }
+        .log-table { width: 100%; border-collapse: collapse; margin-top: 2rem; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .log-table th, .log-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .log-table th { background: #f8fafc; font-weight: 600; color: var(--text-secondary); }
+        .status-pill { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; background: #e2e8f0; color: #475569; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('dashboard') }}" class="back-link">← Return to Dashboard</a>
+        <header class="header">
+            <h1>Activity History</h1>
+            <p>Comprehensive security audit and system mutation log.</p>
+        </header>
+
+        <main>
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Module</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td style="font-size: 0.85rem; color: var(--text-secondary);">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td><strong>{{ log.user_ref.username if log.user_ref else 'SYSTEM' }}</strong></td>
+                        <td>{{ log.action }}</td>
+                        <td><span class="status-pill">{{ log.target }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+    </div>
+</body>
+</html>

@@ -83,9 +83,8 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         
-        record_system_action(f"Registered new PRID profile: {username} ({prid_role})", target="System Reg")
-        
         login_user(new_user)
+        record_system_action(f"Registered new PRID profile: {username} ({prid_role})", target="System Reg")
         flash("Registration successful. PRID linked to main orchestrator.")
         return redirect(url_for('dashboard'))
     return render_template('3_PRID_Designer/register.html')
