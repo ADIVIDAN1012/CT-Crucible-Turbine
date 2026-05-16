@@ -64,6 +64,27 @@ def login():
         flash("Invalid credentials.")
     return render_template('3_PRID_Designer/login.html')
 
+# Full name to PRID role mapping (case-insensitive)
+NAME_ROLE_MAP = {
+    "aditya sadhu": "PRID_1",
+    "rohit pandit": "PRID_2",
+    "khushi jamwal": "PRID_3",
+    "vanshita rakwal": "PRID_4",
+    "shrawan": "PRID_5",
+}
+
+def detect_role_from_name(username):
+    """Auto-detect PRID role based on full name, case-insensitive."""
+    key = username.strip().lower()
+    # Check full name match first
+    if key in NAME_ROLE_MAP:
+        return NAME_ROLE_MAP[key]
+    # Check if username starts with any mapped name
+    for name, role in NAME_ROLE_MAP.items():
+        if key.startswith(name) or name.startswith(key):
+            return role
+    return None
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if current_user.is_authenticated:
@@ -71,20 +92,25 @@ def register():
         
     if request.method == "POST":
         username = request.form.get("username")
-        prid_role = request.form.get("prid_role")
         password = request.form.get("password")
         
         if User.query.filter_by(username=username).first():
             flash("Username ID already onboarded.")
             return redirect(url_for('register'))
+        
+        # Auto-detect role from full name
+        detected_role = detect_role_from_name(username)
+        if detected_role is None:
+            flash("Registration restricted to authorized team members only. Please use your full name as registered.")
+            return redirect(url_for('register'))
             
-        new_user = User(username=username, prid_role=prid_role)
+        new_user = User(username=username, prid_role=detected_role)
         new_user.set_password(password)
         db.session.add(new_user)
         db.session.commit()
         
         login_user(new_user)
-        record_system_action(f"Registered new PRID profile: {username} ({prid_role})", target="System Reg")
+        record_system_action(f"Registered new PRID profile: {username} ({detected_role})", target="System Reg")
         flash("Registration successful. PRID linked to main orchestrator.")
         return redirect(url_for('dashboard'))
     return render_template('3_PRID_Designer/register.html')
@@ -104,6 +130,7 @@ def dashboard():
     tasks = Task.query.order_by(Task.id.desc()).all()
     users = User.query.all()
     audit_logs = AuditLog.query.order_by(AuditLog.id.desc()).limit(5).all()
+    webhooks = Webhook.query.all()
     
     # Calculate Completion Metrics
     total_tasks = len(tasks)
@@ -112,11 +139,17 @@ def dashboard():
     else:
         completion_pc = 0
     
+    # Detect database type from connection string
+    db_path = os.environ.get('DATABASE_URL', 'sqlite:///./orbit_core.db')
+    db_type = "PostgreSQL" if 'postgres' in db_path else "SQLite"
+    
     return render_template('1_PRID_Supervisor/dashboard.html', 
                            tasks=tasks, 
                            users=users, 
                            audit_logs=audit_logs,
-                           completion_pc=completion_pc)
+                           webhooks=webhooks,
+                           completion_pc=completion_pc,
+                           db_type=db_type)
 
 @app.route("/team")
 @login_required
@@ -126,8 +159,10 @@ def team_view():
 
 @app.route("/logs")
 @login_required
-@require_prid("PRID_1")
 def logs_view():
+    # PRID_1 (Supervisor) and PRID_2 (Auditor) can access full logs
+    if current_user.prid_role not in ('PRID_1', 'PRID_2'):
+        return jsonify({"error": "Security Breach Prevented", "message": "Access denied."}), 403
     all_logs = AuditLog.query.order_by(AuditLog.id.desc()).all()
     return render_template('2_PRID_Auditor/full_logs.html', logs=all_logs)
 
@@ -160,6 +195,7 @@ def api_update_task_status(task_id):
 
 @app.route("/api/update_task_progress/<int:task_id>", methods=["POST"])
 @login_required
+@require_prid("PRID_1")
 def api_update_task_progress(task_id):
     task = Task.query.get_or_404(task_id)
     progress = request.form.get("progress", type=int)

@@ -10,10 +10,45 @@
         .form-group { margin-bottom: 1.5rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
         .form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
+        .form-group select:disabled { background: #e2e8f0; color: #64748b; cursor: not-allowed; }
+        .form-group input:disabled { background: #e2e8f0; cursor: not-allowed; }
         .btn-primary { display: block; width: 100%; padding: 0.75rem; background: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; }
         .btn-primary:hover { background: #1d4ed8; }
         .alert { padding: 1rem; background: #fee2e2; color: #991b1b; border-radius: 6px; margin-bottom: 1rem; }
+        .role-notice { font-size: 0.85rem; color: #64748b; margin-top: 0.3rem; font-style: italic; }
     </style>
+    <script>
+        const ROLE_MAP = {
+            "aditya sadhu": { value: "PRID_1", label: "Supervisor" },
+            "rohit pandit": { value: "PRID_2", label: "Auditor" },
+            "khushi jamwal": { value: "PRID_3", label: "Designer" },
+            "vanshita rakwal": { value: "PRID_4", label: "Integrator" },
+            "shrawan": { value: "PRID_5", label: "Database Admin" },
+        };
+
+        function detectRole() {
+            const nameInput = document.getElementById('username');
+            const roleSelect = document.getElementById('prid_role');
+            const roleNotice = document.getElementById('role-notice');
+            const name = nameInput.value.trim().toLowerCase();
+            
+            let matched = false;
+            for (const [key, role] of Object.entries(ROLE_MAP)) {
+                if (name === key || name.startsWith(key) || key.startsWith(name)) {
+                    roleSelect.value = role.value;
+                    roleSelect.disabled = true;
+                    roleNotice.textContent = "Role auto-assigned based on your name";
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                roleSelect.value = "";
+                roleSelect.disabled = false;
+                roleNotice.textContent = "Enter your registered full name to auto-detect role";
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container auth-container">
@@ -33,18 +68,20 @@
 
             <form method="POST" action="{{ url_for('register') }}">
                 <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required autofocus>
+                    <label for="username">Full Name</label>
+                    <input type="text" id="username" name="username" required autofocus oninput="detectRole()" placeholder="Enter your full name as registered">
                 </div>
                 <div class="form-group">
-                    <label for="prid_role">Select Your Role</label>
+                    <label for="prid_role">Assigned Role (Auto-detected)</label>
                     <select id="prid_role" name="prid_role" required>
+                        <option value="">-- Detecting role --</option>
                         <option value="PRID_1">Supervisor</option>
                         <option value="PRID_2">Auditor</option>
                         <option value="PRID_3">Designer</option>
                         <option value="PRID_4">Integrator</option>
                         <option value="PRID_5">Database Admin</option>
                     </select>
+                    <div id="role-notice" class="role-notice">Enter your registered full name to auto-detect role</div>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
