@@ -12,6 +12,7 @@
         .form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
         .form-group select:disabled { background: #e2e8f0; color: #64748b; cursor: not-allowed; }
         .form-group input:disabled { background: #e2e8f0; cursor: not-allowed; }
+        .form-group select option { cursor: not-allowed; }
         .btn-primary { display: block; width: 100%; padding: 0.75rem; background: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; }
         .btn-primary:hover { background: #1d4ed8; }
         .alert { padding: 1rem; background: #fee2e2; color: #991b1b; border-radius: 6px; margin-bottom: 1rem; }
@@ -26,6 +27,12 @@
             "shrawan": { value: "PRID_5", label: "Database Admin" },
         };
 
+        // Always disabled - role selection is forbidden
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelect = document.getElementById('prid_role');
+            roleSelect.disabled = true;
+        });
+
         function detectRole() {
             const nameInput = document.getElementById('username');
             const roleSelect = document.getElementById('prid_role');
@@ -36,15 +43,13 @@
             for (const [key, role] of Object.entries(ROLE_MAP)) {
                 if (name === key || name.startsWith(key) || key.startsWith(name)) {
                     roleSelect.value = role.value;
-                    roleSelect.disabled = true;
-                    roleNotice.textContent = "Role auto-assigned based on your name";
+                    roleNotice.textContent = "\u26A0 Role auto-assigned based on your name";
                     matched = true;
                     break;
                 }
             }
             if (!matched) {
                 roleSelect.value = "";
-                roleSelect.disabled = false;
                 roleNotice.textContent = "Enter your registered full name to auto-detect role";
             }
         }
