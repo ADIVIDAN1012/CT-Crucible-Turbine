@@ -58,6 +58,13 @@ def login():
         
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
+            # Auto-fix role if missing or unassigned (backward compat)
+            if not user.prid_role or user.prid_role == 'PRID_UNASSIGNED':
+                fixed = detect_role_from_name(username)
+                if fixed:
+                    user.prid_role = fixed
+                    db.session.commit()
+                    record_system_action(f"Auto-fixed role for {username}: {fixed}", target="Login")
             login_user(user, remember=remember)
             record_system_action("User authenticated successfully.", target="Login")
             return redirect(url_for('dashboard'))
