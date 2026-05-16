@@ -1,0 +1,95 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx} % Professional Times typography
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{amssymb} % For checkboxes
+\newcommand{\checkedbox}{\makebox[0pt][l]{$\square$}\raisebox{.15ex}{\hspace{0.1em}$\checkmark$}}
+
+% Custom Colors
+\definecolor{headerblue}{RGB}{0, 51, 102}
+
+% Header/Title Settings
+\titleformat{\section}{\large\bfseries\color{headerblue}}{}{0em}{}[\titlerule]
+
+\begin{document}
+
+\begin{center}
+    {\large \textbf{CRUCIBLE TURBINE RATIFICATION SHEET}} \\
+    \vspace{2mm}
+    {\small \textbf{Group 05 | Project Orbit | PRID Framework}} \\
+    \vspace{2mm}
+    \textit{Document Status: PENDING RATIFICATION}
+\end{center}
+
+\vspace{5mm}
+
+\section{Supervisory Directive}
+This document records the official roles and duties for Project Orbit. As the Supervisor (PRID\_1), I am setting clear boundaries for each team member to ensure project security and organization. Every member must follow the rules listed below and stay within their assigned work area.
+
+\section{Supervisory Designation (Reserved)}
+The following role is fixed and held exclusively by the Project Architect.
+
+\vspace{3mm}
+\begin{spacing}{1.2}
+\begin{tabular}{|l|l|p{8cm}|}
+\hline
+\textbf{ID} & \textbf{Assigned Member} & \textbf{Core Responsibilities} \\
+\hline
+\textbf{PRID\_1} & \textbf{Aditya Sadhu \checkmark} & \textbf{Supervisor:} Final project approval, security architecture, and merging all system modules. \\
+\hline
+\end{tabular}
+\end{spacing}
+
+\section{Consolidated Team Ratification}
+The following roles are mandatory for the Project Orbit ecosystem. By ticking the box and signing your name, you acknowledge your assigned duties and agree to follow the security protocols.
+
+\vspace{5mm}
+\begin{spacing}{1.4}
+\noindent \begin{tabular}{|l|l|p{5cm}|p{4.5cm}|c|}
+\hline
+\textbf{ID} & \textbf{Role} & \textbf{Key Responsibilities} & \textbf{Full Member Name} & \textbf{Tick} \\
+\hline
+PRID\_2 & \textbf{Auditor} & Tracking code precision, security audits, and log management. & Rohit Kumar Pandit & \checkedbox \\
+\hline
+PRID\_3 & \textbf{Designer} & Building UI layouts, static assets, and frontend cleanup. & Khushi Jamwal & \checkedbox \\
+\hline
+PRID\_4 & \textbf{Integrator} & Connecting modules, managing extensions, and fixing conflicts. & Vansita Rakwal & \checkedbox \\
+\hline
+PRID\_5 & \textbf{DBA} & Database schema design, data flow, and core/db security. & Shravan kumar & \checkedbox \\
+\hline
+\end{tabular}
+\end{spacing}
+
+\section{Security Protocol}
+\begin{enumerate}
+    \item \textbf{Work Zones}: Access is strictly restricted to your assigned PRID folder.
+    \item \textbf{Access Rules}: Unauthorized file modifications will be automatically blocked.
+    \item \textbf{Final Say}: PRID\_1 (Supervisor) holds exclusive authority for final merges.
+\end{enumerate}
+
+\vspace{10mm}
+
+\section{Final Ratification \& Sign-off}
+\vspace{5mm}
+
+\begin{flushright}
+\begin{spacing}{1.2}
+    {\large \textbf{\textit{Aditya Sadhu \checkmark}}} \\
+    \rule{6.5cm}{0.6pt} \\
+    \textbf{Aditya Sadhu} (PRID\_1 Supervisor) \\
+    \footnotesize \textit{Ratified on: \today}
+\end{spacing}
+\end{flushright}
+
+\vspace{10mm}
+\begin{center}
+    \small \textit{This document is digitally locked under the Orbit Precision Guard 1.1.0 Protocol.}
+\end{center}
+
+\end{document}

@@ -4,17 +4,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap');
 
 :root {
-  --primary: #9d4edd;
+  --primary: #8b5bb3;
   --primary-hover: #7b2cbf;
   --secondary: #e0aaff;
   --bg-color: #0b0710;
-  --surface: rgba(25, 10, 45, 0.6);
+  --surface: rgba(68, 9, 146, 0.6);
   --surface-hover: rgba(45, 15, 80, 0.8);
   --border: rgba(157, 78, 221, 0.3);
   --text-primary: #ffffff;
   --text-secondary: #bba2c8;
   --success: #10b981;
-  --danger: #ef4444;
+  --danger: #a544ef;
   --glass-blur: blur(20px);
 }
 

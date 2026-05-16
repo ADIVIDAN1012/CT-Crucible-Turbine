@@ -1,0 +1,132 @@
+{
+  "project": "Crucible Turbine (Project Orbit)",
+  "version": "1.1.0",
+  "framework": "PRID Isolation Protocol",
+  "prid_assignments": [
+    {
+      "prid": "PRID_1",
+      "role": "Supervisor",
+      "owner": "Aditya Sadhu",
+      "scope": {
+        "directory": "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\1_PRID_Supervisor",
+        "description": "Supervisor exclusive workspace."
+      },
+      "responsibilities": [
+        "Final system ratification and code merging.",
+        "System-wide security architecture (TLS/SSH/Hashing).",
+        "Managing the Project Management System (PMS) core logic.",
+        "Oversight of all sub-directories and role assignments."
+      ],
+      "access_rules": {
+        "read_write": ["C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\1_PRID_Supervisor"],
+        "read_only": [
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\2_PRID_Auditor",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\3_PRID_Designer",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\4_PRID_Integrator",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\5_PRID_DBA"
+        ]
+      }
+    },
+    {
+      "prid": "PRID_2",
+      "role": "Auditor",
+      "owner": "[PENDING RATIFICATION]",
+      "scope": {
+        "directory": "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\2_PRID_Auditor",
+        "description": "Auditor exclusive workspace."
+      },
+      "responsibilities": [
+        "Verifying 90% Precision across all code commits.",
+        "Performing security audits on project modules.",
+        "Maintaining the Group 05 Integrity Protocol documentation.",
+        "Log validation for all system changes."
+      ],
+      "access_rules": {
+        "read_write": ["C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\2_PRID_Auditor"],
+        "read_only": [
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\1_PRID_Supervisor",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\3_PRID_Designer",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\4_PRID_Integrator",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\5_PRID_DBA"
+        ]
+      }
+    },
+    {
+      "prid": "PRID_3",
+      "role": "Designer",
+      "owner": "[PENDING RATIFICATION]",
+      "scope": {
+        "directory": "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\3_PRID_Designer",
+        "description": "Designer exclusive workspace."
+      },
+      "responsibilities": [
+        "UI/UX Architecture and frontend layout design.",
+        "Management of all static assets (CSS, images, icons).",
+        "Ensuring cross-browser compatibility and responsive design.",
+        "Frontend-to-Backend styling integration."
+      ],
+      "access_rules": {
+        "read_write": ["C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\3_PRID_Designer"],
+        "read_only": [
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\1_PRID_Supervisor",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\2_PRID_Auditor",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\4_PRID_Integrator",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\5_PRID_DBA"
+        ]
+      }
+    },
+    {
+      "prid": "PRID_4",
+      "role": "Integrator",
+      "owner": "[PENDING RATIFICATION]",
+      "scope": {
+        "directory": "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\4_PRID_Integrator",
+        "description": "Integrator exclusive workspace."
+      },
+      "responsibilities": [
+        "API handshaking and module connectivity logic.",
+        "Managing external extensions and library dependencies.",
+        "Resolving merge conflicts within the Orbit ecosystem.",
+        "Ensuring seamless data flow between the frontend and core engine."
+      ],
+      "access_rules": {
+        "read_write": ["C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\4_PRID_Integrator"],
+        "read_only": [
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\1_PRID_Supervisor",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\2_PRID_Auditor",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\3_PRID_Designer",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\5_PRID_DBA"
+        ]
+      }
+    },
+    {
+      "prid": "PRID_5",
+      "role": "DBA (Database Administrator)",
+      "owner": "[PENDING RATIFICATION]",
+      "scope": {
+        "directory": "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\5_PRID_DBA",
+        "description": "Database Administrator exclusive workspace."
+      },
+      "responsibilities": [
+        "SQLite schema design and database normalization.",
+        "Query optimization and data persistence management.",
+        "Handling CRUD operations and database integrity constraints.",
+        "Securing sensitive project data within the 'core/db' environment."
+      ],
+      "access_rules": {
+        "read_write": ["C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\5_PRID_DBA"],
+        "read_only": [
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\1_PRID_Supervisor",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\2_PRID_Auditor",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\3_PRID_Designer",
+          "C:\\Users\\aadit\\OneDrive\\Desktop\\Academic Notes\\Semester 6\\Major Project\\Orbit\\TeamWork\\4_PRID_Integrator"
+        ]
+      }
+    }
+  ],
+  "global_enforcement": {
+    "protocol": "Strict Role-Based Access Control (RBAC)",
+    "cross_scope_modification": "DENIED",
+    "ai_directive": "AI agents must enforce read-only status for any PRID attempting to mutate files outside their designated scope directory."
+  }
+}
