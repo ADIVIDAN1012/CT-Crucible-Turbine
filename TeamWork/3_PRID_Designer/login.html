@@ -70,7 +70,15 @@
             <form method="POST" action="{{ url_for('login') }}">
                 <div class="form-group">
                     <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required autofocus>
+                    <select id="username" name="username" required autofocus>
+                        <option value="">— Select your name —</option>
+                        <option value="Aditya Sadhu">Aditya Sadhu (Supervisor)</option>
+                        <option value="Rohit Pandit">Rohit Pandit (Auditor)</option>
+                        <option value="Khushi Jamwal">Khushi Jamwal (Designer)</option>
+                        <option value="Vanshita Rakwal">Vanshita Rakwal (Integrator)</option>
+                        <option value="Shrawan">Shrawan (Database Admin)</option>
+                        <option value="admin" style="color: #64748b; font-style: italic;">— Admin —</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>

@@ -72,7 +72,14 @@
             <form method="POST" action="{{ url_for('register') }}">
                 <div class="form-group">
                     <label for="username">Full Name</label>
-                    <input type="text" id="username" name="username" required autofocus oninput="detectRole()" placeholder="Enter your full name as registered">
+                    <select id="username" name="username" required autofocus onchange="detectRole()">
+                        <option value="">— Select your name —</option>
+                        <option value="Aditya Sadhu">Aditya Sadhu</option>
+                        <option value="Rohit Pandit">Rohit Pandit</option>
+                        <option value="Khushi Jamwal">Khushi Jamwal</option>
+                        <option value="Vanshita Rakwal">Vanshita Rakwal</option>
+                        <option value="Shrawan">Shrawan</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Assigned Role (Auto-detected)</label>
