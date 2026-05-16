@@ -27,29 +27,27 @@
             "shrawan": { value: "PRID_5", label: "Database Admin" },
         };
 
-        // Always disabled - role selection is forbidden
-        document.addEventListener('DOMContentLoaded', function() {
-            const roleSelect = document.getElementById('prid_role');
-            roleSelect.disabled = true;
-        });
-
         function detectRole() {
             const nameInput = document.getElementById('username');
-            const roleSelect = document.getElementById('prid_role');
+            const roleDisplay = document.getElementById('role-display');
             const roleNotice = document.getElementById('role-notice');
             const name = nameInput.value.trim().toLowerCase();
             
             let matched = false;
             for (const [key, role] of Object.entries(ROLE_MAP)) {
                 if (name === key || name.startsWith(key) || key.startsWith(name)) {
-                    roleSelect.value = role.value;
+                    roleDisplay.textContent = role.label;
+                    roleDisplay.style.color = '#003366';
+                    roleDisplay.style.fontWeight = '600';
                     roleNotice.textContent = "\u26A0 Role auto-assigned based on your name";
                     matched = true;
                     break;
                 }
             }
             if (!matched) {
-                roleSelect.value = "";
+                roleDisplay.textContent = 'Enter your name to detect role';
+                roleDisplay.style.color = '#64748b';
+                roleDisplay.style.fontWeight = '400';
                 roleNotice.textContent = "Enter your registered full name to auto-detect role";
             }
         }
@@ -77,15 +75,10 @@
                     <input type="text" id="username" name="username" required autofocus oninput="detectRole()" placeholder="Enter your full name as registered">
                 </div>
                 <div class="form-group">
-                    <label for="prid_role">Assigned Role (Auto-detected)</label>
-                    <select id="prid_role" name="prid_role" required>
-                        <option value="">-- Detecting role --</option>
-                        <option value="PRID_1">Supervisor</option>
-                        <option value="PRID_2">Auditor</option>
-                        <option value="PRID_3">Designer</option>
-                        <option value="PRID_4">Integrator</option>
-                        <option value="PRID_5">Database Admin</option>
-                    </select>
+                    <label>Assigned Role (Auto-detected)</label>
+                    <div id="role-display" style="padding: 0.75rem; background: #e2e8f0; border-radius: 6px; font-size: 1rem; color: #64748b; min-height: 1.2rem;">
+                        Enter your name to detect role
+                    </div>
                     <div id="role-notice" class="role-notice">Enter your registered full name to auto-detect role</div>
                 </div>
                 <div class="form-group">
