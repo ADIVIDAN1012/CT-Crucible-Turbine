@@ -44,90 +44,68 @@ def load_user(user_id):
 def home():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    return redirect(url_for('login'))
+    return redirect(url_for('auth'))
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
+@app.route("/auth", methods=["GET", "POST"])
+def auth():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-        
+    
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        remember = request.form.get('remember') == '1'
+        form_action = request.form.get("action", "login")
         
+        if form_action == "register":
+            # --- REGISTER ---
+            if User.query.filter_by(username=username).first():
+                flash("Username ID already onboarded.")
+                return redirect(url_for('auth'))
+            
+            detected_role = detect_role_from_name(username)
+            if detected_role is None:
+                flash("Registration restricted to authorized team members only.")
+                return redirect(url_for('auth'))
+            
+            new_user = User(username=username, prid_role=detected_role)
+            new_user.set_password(password)
+            db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user)
+            record_system_action(f"Registered new PRID profile: {username} ({detected_role})", target="System Reg")
+            flash("Registration successful. PRID linked to main orchestrator.")
+            return redirect(url_for('dashboard'))
+        
+        # --- LOGIN ---
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
-            # Auto-fix role if missing or unassigned (backward compat)
             if not user.prid_role or user.prid_role == 'PRID_UNASSIGNED':
                 fixed = detect_role_from_name(username)
                 if fixed:
                     user.prid_role = fixed
                     db.session.commit()
                     record_system_action(f"Auto-fixed role for {username}: {fixed}", target="Login")
-            login_user(user, remember=remember)
+            login_user(user, remember=request.form.get('remember') == '1')
             record_system_action("User authenticated successfully.", target="Login")
             return redirect(url_for('dashboard'))
         flash("Invalid credentials.")
-    return render_template('3_PRID_Designer/login.html')
+    
+    return render_template('3_PRID_Designer/auth.html')
 
-# Full name to PRID role mapping (case-insensitive)
-NAME_ROLE_MAP = {
-    "aditya sadhu": "PRID_1",
-    "rohit pandit": "PRID_2",
-    "khushi jamwal": "PRID_3",
-    "vanshita rakwal": "PRID_4",
-    "shrawan": "PRID_5",
-}
-
-def detect_role_from_name(username):
-    """Auto-detect PRID role based on full name, case-insensitive."""
-    key = username.strip().lower()
-    # Check full name match first
-    if key in NAME_ROLE_MAP:
-        return NAME_ROLE_MAP[key]
-    # Check if username starts with any mapped name
-    for name, role in NAME_ROLE_MAP.items():
-        if key.startswith(name) or name.startswith(key):
-            return role
-    return None
+@app.route("/login", methods=["GET", "POST"])
+def login_redirect():
+    return redirect(url_for('auth'))
 
 @app.route("/register", methods=["GET", "POST"])
-def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
-        
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-        
-        if User.query.filter_by(username=username).first():
-            flash("Username ID already onboarded.")
-            return redirect(url_for('register'))
-        
-        # Auto-detect role from full name
-        detected_role = detect_role_from_name(username)
-        if detected_role is None:
-            flash("Registration restricted to authorized team members only. Please use your full name as registered.")
-            return redirect(url_for('register'))
-            
-        new_user = User(username=username, prid_role=detected_role)
-        new_user.set_password(password)
-        db.session.add(new_user)
-        db.session.commit()
-        
-        login_user(new_user)
-        record_system_action(f"Registered new PRID profile: {username} ({detected_role})", target="System Reg")
-        flash("Registration successful. PRID linked to main orchestrator.")
-        return redirect(url_for('dashboard'))
-    return render_template('3_PRID_Designer/register.html')
+def register_redirect():
+    return redirect(url_for('auth'))
 
 @app.route("/logout")
 @login_required
 def logout():
     record_system_action("Terminated user session.", target="System Logout")
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for('auth'))
 
 # --- DASHBOARD & CORE ROUTES ---
 

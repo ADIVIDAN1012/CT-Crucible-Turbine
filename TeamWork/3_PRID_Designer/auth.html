@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orbit Project Manager</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .auth-container { max-width: 420px; margin: 3rem auto; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; margin-bottom: 0.4rem; font-weight: 500; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 0.7rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.95rem; box-sizing: border-box; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+        .btn-primary { display: block; width: 100%; padding: 0.7rem; background: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; transition: background 0.2s; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-secondary { display: block; width: 100%; padding: 0.7rem; background: transparent; color: var(--primary-color); border: 2px solid var(--primary-color); border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; transition: all 0.2s; margin-top: 0.75rem; }
+        .btn-secondary:hover { background: var(--primary-color); color: white; }
+        .alert { padding: 0.8rem; background: #fee2e2; color: #991b1b; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem; }
+        .role-display { padding: 0.7rem; background: #f1f5f9; border-radius: 6px; font-size: 0.95rem; color: #64748b; min-height: 1.2rem; border: 1px solid #e2e8f0; transition: all 0.2s; }
+        .role-notice { font-size: 0.8rem; color: #64748b; margin-top: 0.3rem; font-style: italic; }
+        .tabs { display: flex; margin-bottom: 1.5rem; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); }
+        .tab { flex: 1; padding: 0.7rem; text-align: center; cursor: pointer; font-weight: 600; font-size: 0.95rem; background: #f8fafc; color: #64748b; border: none; transition: all 0.2s; }
+        .tab.active { background: var(--primary-color); color: white; }
+        .tab:not(.active):hover { background: #e2e8f0; }
+        .checkbox-group { display: flex; align-items: center; gap: 0.5rem; }
+        .checkbox-group input { width: auto; }
+        .checkbox-group label { margin-bottom: 0; cursor: pointer; }
+        .project-header { text-align: center; margin-bottom: 1.5rem; }
+        .project-header h1 { font-size: 1.6rem; margin: 0 0 0.25rem 0; }
+        .project-header p { margin: 0; font-size: 0.85rem; color: var(--text-secondary); }
+        .hidden { display: none; }
+        .admin-option { color: #64748b; font-style: italic; }
+    </style>
+    <script>
+        const ROLE_MAP = {
+            "aditya sadhu": { value: "PRID_1", label: "Supervisor" },
+            "rohit pandit": { value: "PRID_2", label: "Auditor" },
+            "khushi jamwal": { value: "PRID_3", label: "Designer" },
+            "vanshita rakwal": { value: "PRID_4", label: "Integrator" },
+            "shrawan": { value: "PRID_5", label: "Database Admin" },
+        };
+
+        function detectRole() {
+            const name = document.getElementById('username').value.trim().toLowerCase();
+            const display = document.getElementById('role-display');
+            const notice = document.getElementById('role-notice');
+            let matched = false;
+            for (const [key, role] of Object.entries(ROLE_MAP)) {
+                if (name === key || name.startsWith(key) || key.startsWith(name)) {
+                    display.textContent = role.label;
+                    display.style.color = '#003366';
+                    display.style.fontWeight = '600';
+                    notice.textContent = '\u26A0 Role auto-assigned based on your name';
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                display.textContent = name ? 'Unrecognized name' : 'Select your name to detect role';
+                display.style.color = '#64748b';
+                display.style.fontWeight = '400';
+                notice.textContent = 'Select a registered team member to auto-detect role';
+            }
+        }
+
+        function switchTab(tab) {
+            document.getElementById('login-tab').classList.toggle('active', tab === 'login');
+            document.getElementById('register-tab').classList.toggle('active', tab === 'register');
+            document.getElementById('login-section').classList.toggle('hidden', tab !== 'login');
+            document.getElementById('register-section').classList.toggle('hidden', tab !== 'register');
+            document.getElementById('action').value = tab;
+            document.getElementById('submit-btn').textContent = tab === 'login' ? 'Log In' : 'Create Account';
+        }
+    </script>
+</head>
+<body>
+    <div class="container auth-container">
+        <div class="project-header">
+            <h1>Orbit Project Workspace</h1>
+            <p>Authentication Portal</p>
+        </div>
+
+        <div class="orbit-card" style="padding: 1.5rem;">
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="alert">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <div class="tabs">
+                <button id="login-tab" class="tab active" onclick="switchTab('login')">Login</button>
+                <button id="register-tab" class="tab" onclick="switchTab('register')">Register</button>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth') }}">
+                <input type="hidden" id="action" name="action" value="login">
+
+                <div class="form-group">
+                    <label for="username">Full Name</label>
+                    <select id="username" name="username" required onchange="detectRole()">
+                        <option value="">— Select your name —</option>
+                        <option value="Aditya Sadhu">Aditya Sadhu (Supervisor)</option>
+                        <option value="Rohit Pandit">Rohit Pandit (Auditor)</option>
+                        <option value="Khushi Jamwal">Khushi Jamwal (Designer)</option>
+                        <option value="Vanshita Rakwal">Vanshita Rakwal (Integrator)</option>
+                        <option value="Shrawan">Shrawan (Database Admin)</option>
+                        <option value="admin" class="admin-option">— Admin —</option>
+                    </select>
+                </div>
+
+                <div id="register-section" class="hidden">
+                    <div class="form-group">
+                        <label>Assigned Role (Auto-detected)</label>
+                        <div id="role-display" class="role-display">Select your name to detect role</div>
+                        <div id="role-notice" class="role-notice">Select a registered team member to auto-detect role</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <div id="login-section">
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="remember" name="remember" value="1">
+                        <label for="remember">Keep me logged in</label>
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-btn" class="btn-primary">Log In</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
