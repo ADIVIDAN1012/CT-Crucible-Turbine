@@ -31,7 +31,7 @@ init_db(app)
 
 # Setup LoginManager
 login_manager = LoginManager()
-login_manager.login_view = 'login'
+login_manager.login_view = 'auth'
 login_manager.init_app(app)
 
 @login_manager.user_loader
@@ -45,6 +45,25 @@ def home():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     return redirect(url_for('auth'))
+
+# Full name to PRID role mapping (case-insensitive)
+NAME_ROLE_MAP = {
+    "aditya sadhu": "PRID_1",
+    "rohit pandit": "PRID_2",
+    "khushi jamwal": "PRID_3",
+    "vanshita rakwal": "PRID_4",
+    "shrawan": "PRID_5",
+}
+
+def detect_role_from_name(username):
+    """Auto-detect PRID role based on full name, case-insensitive."""
+    key = username.strip().lower()
+    if key in NAME_ROLE_MAP:
+        return NAME_ROLE_MAP[key]
+    for name, role in NAME_ROLE_MAP.items():
+        if key.startswith(name) or name.startswith(key):
+            return role
+    return None
 
 @app.route("/auth", methods=["GET", "POST"])
 def auth():
