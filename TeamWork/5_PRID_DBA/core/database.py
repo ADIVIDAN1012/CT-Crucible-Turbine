@@ -19,7 +19,7 @@ class User(db.Model, UserMixin):
     prid_role = db.Column(db.String(32), default='PRID_UNASSIGNED')
     
     # Relationships
-    tasks = db.relationship('Task', backref='assignee', lazy=True)
+    # assigned_tasks is backref'd from Task.assignee
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -32,21 +32,14 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128), nullable=False)
     description = db.Column(db.Text)
-    status = db.Column(db.String(32), default='Pending') # Pending, In Progress, Review, Completed
-    progress = db.Column(db.Integer, default=0) # Progress percentage 0-100
+    status = db.Column(db.String(32), default='Pending') # Pending, In Progress, Completed
     assigned_to_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    updated_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    updated_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    def update_status_from_progress(self):
-        """Auto-update status based on progress value"""
-        if self.progress >= 100:
-            self.status = 'Completed'
-        elif self.progress >= 75:
-            self.status = 'Review'
-        elif self.progress >= 25:
-            self.status = 'In Progress'
-        else:
-            self.status = 'Pending'
+    assignee = db.relationship('User', foreign_keys=[assigned_to_id], backref='assigned_tasks')
+    updated_by = db.relationship('User', foreign_keys=[updated_by_id])
 
 class AuditLog(db.Model):
     __tablename__ = 'audit_logs'
@@ -77,6 +70,20 @@ def init_db(app):
     with app.app_context():
         # Create all tables
         db.create_all()
+        # Auto-migrate: add missing columns for existing databases
+        try:
+            from sqlalchemy import inspect
+            inspector = inspect(db.engine)
+            task_cols = {c['name'] for c in inspector.get_columns('tasks')}
+            if 'updated_by_id' not in task_cols:
+                db.session.execute(db.text('ALTER TABLE tasks ADD COLUMN updated_by_id INTEGER REFERENCES users(id)'))
+            if 'updated_at' not in task_cols:
+                db.session.execute(db.text('ALTER TABLE tasks ADD COLUMN updated_at TIMESTAMP'))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"[DB MIGRATION] Skipped (non-critical): {e}")
+        
         # Seed an initial Supervisor if none exists
         if not User.query.filter_by(username='admin').first():
             u = User(username='admin', prid_role='PRID_1')

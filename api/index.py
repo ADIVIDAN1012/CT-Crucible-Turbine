@@ -2,6 +2,7 @@ import os
 import sys
 import importlib
 from flask import Flask, jsonify, request, render_template, redirect, url_for, flash
+from datetime import datetime
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 # Dynamic imports for modules with numeric prefixes
@@ -136,10 +137,11 @@ def dashboard():
     audit_logs = AuditLog.query.order_by(AuditLog.id.desc()).limit(5).all()
     webhooks = Webhook.query.all()
     
-    # Calculate Completion Metrics
+    # Calculate Completion Metrics (status-based)
     total_tasks = len(tasks)
     if total_tasks > 0:
-        completion_pc = int(sum(t.progress for t in tasks) / total_tasks)
+        status_scores = {'Completed': 100, 'In Progress': 50, 'Pending': 0}
+        completion_pc = int(sum(status_scores.get(t.status, 0) for t in tasks) / total_tasks)
     else:
         completion_pc = 0
     
@@ -176,8 +178,9 @@ def logs_view():
 def api_create_task():
     title = request.form.get("title")
     description = request.form.get("description")
+    assigned_to_id = request.form.get("assigned_to_id", type=int)
     
-    new_task = Task(title=title, description=description)
+    new_task = Task(title=title, description=description, assigned_to_id=assigned_to_id or None)
     db.session.add(new_task)
     db.session.commit()
     
@@ -189,26 +192,14 @@ def api_create_task():
 @login_required
 def api_update_task_status(task_id):
     task = Task.query.get_or_404(task_id)
-    task.status = "Completed"
-    task.progress = 100
-    db.session.commit()
-    
-    record_system_action(f"Marked task Completed: {task.title}", target="Tasks")
-    flash(f"Task marked complete!")
-    return redirect(url_for('dashboard'))
-
-@app.route("/api/update_task_progress/<int:task_id>", methods=["POST"])
-@login_required
-@require_prid("PRID_1")
-def api_update_task_progress(task_id):
-    task = Task.query.get_or_404(task_id)
-    progress = request.form.get("progress", type=int)
-    if progress is not None and 0 <= progress <= 100:
-        task.progress = progress
-        task.update_status_from_progress()
+    new_status = request.form.get("status")
+    if new_status in ('Pending', 'In Progress', 'Completed'):
+        task.status = new_status
+        task.updated_by_id = current_user.id
+        task.updated_at = datetime.utcnow()
         db.session.commit()
-        record_system_action(f"Updated task progress to {progress}%: {task.title}", target="Tasks")
-        flash(f"Task progress updated to {progress}%!")
+        record_system_action(f"Updated task [{task.title}] → {new_status} (by {current_user.username})", target="Tasks")
+        flash(f"Task status updated to {new_status}!")
     return redirect(url_for('dashboard'))
 
 @app.route("/api/delete_task/<int:task_id>", methods=["POST"])
